@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Card from "../components/Card";
 import { fetchJobs } from "../api/jobs";
-import { Alert, Box, CircularProgress, Grid, Typography } from "@mui/material";
+import { Alert, Grid, LinearProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { StyledButton } from "./JobBoard.styles";
 import { StyledBox } from "../components/Card.styles";
@@ -11,8 +11,7 @@ const Jobboard = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["jobs"],
-    queryFn: fetchJobs,
-    
+    queryFn: () => fetchJobs(),
   });
 
   useEffect(() => {
@@ -20,29 +19,16 @@ const Jobboard = () => {
       setJobIds(data.slice(0, 9));
     }
   }, [data]);
-  console.log(data)
 
   if (isLoading) {
-    return (
-      <Box>
-        <CircularProgress />
-      </Box>
-    );
+    return <LinearProgress />;
   }
 
   if (error) {
-    return (
-      <Box>
-        <Alert severity="error">An error occurred: {error.message}</Alert>
-      </Box>
-    );
+    return <Alert severity="error">An error occurred: {error.message}</Alert>;
   }
   if (!data || data.length === 0)
-    return (
-      <Box>
-        <Typography variant="h6">No jobs available</Typography>
-      </Box>
-    );
+    return <Typography variant="h6">No jobs available</Typography>;
 
   const loadMoreJobs = () => {
     setJobIds((prevJobIds) => data.slice(0, prevJobIds.length + 6));
