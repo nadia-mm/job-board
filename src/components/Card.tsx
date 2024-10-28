@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchJobsById } from "../api/jobs";
-import { Skeleton, Typography } from "@mui/material";
-import { StyledBox } from "./Card.styles";
+import { fetchJobById } from "../api/jobs";
 import React from "react";
-import { decodeHtml, formatDate } from "../utils";
+import { formatDate } from "../utils";
+import "./Card.css";
 
 interface ICard {
   id: string;
@@ -12,33 +11,23 @@ interface ICard {
 const Card: React.FC<ICard> = React.memo(({ id }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["job", id],
-    queryFn: () => fetchJobsById(id),
+    queryFn: () => fetchJobById(id),
   });
 
   if (isLoading) {
-    return <Skeleton variant="rectangular" />;
+    return <div className="skeleton-loader"></div>;
   }
 
   if (error) {
-    return (
-      <Typography component={"p"} color="error">
-        An error occurred: {error.message}
-      </Typography>
-    );
+    return <p className="error-text">An error occurred: {error.message}</p>;
   }
 
   if (!data || data.length === 0) {
-    return <Typography variant="h6">No job available</Typography>;
+    return <p className="no-job">No job available</p>;
   }
 
-  const { text, time, title, url } = data;
-  const [companyName, ...positionParts] = title
-    .replace(/:|is/i, "")
-    .split(/hiring/i);
-  const position = positionParts.join(" ").trim().toLowerCase();
-
-  const formattedDate = formatDate(time);
-  const decodedText = decodeHtml(text);
+  const { time, title, url } = data;
+  const [companyName, ...position] = title.split(/is|hiring/i);
 
   return (
     <a
@@ -48,13 +37,13 @@ const Card: React.FC<ICard> = React.memo(({ id }) => {
       }
       target="_blank"
       rel="noopener noreferrer"
+      className="card-link"
     >
-      <StyledBox>
-        <p>{companyName.trim()}</p>
-        <p>{`Is hiring ${position}`}</p>
-        <p>{decodedText}</p>
-        <p>{formattedDate}</p>
-      </StyledBox>
+      <div className="styled-box">
+        <p className="company-name">{companyName.trim()}</p>
+        <p className="position">Is hiring {position.join(" ").trim()}</p>
+        <p className="date">{formatDate(time)}</p>
+      </div>
     </a>
   );
 });

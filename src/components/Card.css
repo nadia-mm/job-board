@@ -1,0 +1,71 @@
+.skeleton-loader {
+    width: 100%;
+    height: 100px;
+    background-color: #ddd;
+    animation: pulse 1.5s infinite ease-in-out;
+    border-radius: 4px;
+  }
+  
+  @keyframes pulse {
+    0% {
+      background-color: #ddd;
+    }
+    50% {
+      background-color: #ccc;
+    }
+    100% {
+      background-color: #ddd;
+    }
+  }
+  
+  .card-link {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .styled-box {
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+    transition: box-shadow 0.2s ease-in-out;
+  }
+  
+  .styled-box:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .company-name {
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .position {
+    color: #555;
+    font-size: 1rem;
+    margin: 8px 0;
+  }
+  
+  .job-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 8px 0;
+  }
+  
+  .date {
+    font-size: 0.8rem;
+    color: #888;
+  }
+  
+  .error-text {
+    color: #d32f2f;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .no-job {
+    color: #888;
+    text-align: center;
+    font-size: 1rem;
+  }
+  

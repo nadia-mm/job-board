@@ -1,52 +1,64 @@
 import { useQuery } from "@tanstack/react-query";
 import Card from "../components/Card";
-import { fetchJobs } from "../api/jobs";
-import { Alert, Grid, LinearProgress, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { StyledButton } from "./JobBoard.styles";
-import { StyledBox } from "../components/Card.styles";
+import { fetchAllJobIds } from "../api/jobs";
+import { useEffect, useState, useCallback } from "react";
+import "./JobBoard.css";
+import { useIntersectionObserver } from "../hook/useIntersectionObserver";
 
 const Jobboard = () => {
-  const [jobIds, setJobIds] = useState<number[]>([]);
-
   const { data, isLoading, error } = useQuery({
     queryKey: ["jobs"],
-    queryFn: () => fetchJobs(),
+    queryFn: () => fetchAllJobIds(),
   });
+
+  const [jobIds, setJobIds] = useState<number[]>([]);
+  const [page, setPage] = useState(1);
+  const jobsPerPage = 6;
+
+  //const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  const loadMoreJobs = useCallback(() => {
+    setPage((prevPage) => prevPage + 1);
+  }, []);
+
+  const loadMoreRef = useIntersectionObserver(loadMoreJobs);
 
   useEffect(() => {
     if (data) {
-      setJobIds(data.slice(0, 9));
+      const start = (page - 1) * jobsPerPage;
+      const nextJobs = data.slice(start, start + jobsPerPage);
+      setJobIds((prevJobIds) => {
+        const updatedJobIds = [...prevJobIds, ...nextJobs];
+        return [...new Set(updatedJobIds)];
+      });
     }
-  }, [data]);
+  }, [page, data, jobsPerPage]);
 
   if (isLoading) {
-    return <LinearProgress />;
+    return <div className="progress-bar"></div>;
   }
 
   if (error) {
-    return <Alert severity="error">An error occurred: {error.message}</Alert>;
+    return (
+      <div className="alert error">An error occurred: {error.message}</div>
+    );
   }
-  if (!data || data.length === 0)
-    return <Typography variant="h6">No jobs available</Typography>;
 
-  const loadMoreJobs = () => {
-    setJobIds((prevJobIds) => data.slice(0, prevJobIds.length + 6));
-  };
+  if (!data || data.length === 0) {
+    return <h6 className="no-jobs">No jobs available</h6>;
+  }
 
   return (
-    <StyledBox>
+    <div className="jobboard-container">
       <h1>HN Jobs</h1>
-
-      <Grid container spacing={2}>
+      <div className="job-grid">
         {jobIds.map((id: number) => (
-          <Grid item xs={12} sm={12} md={4} key={id}>
-            <Card id={id.toString()} key={id} />
-          </Grid>
+          <Card id={id.toString()} key={id} />
         ))}
-      </Grid>
-      <StyledButton onClick={loadMoreJobs}>Load more</StyledButton>
-    </StyledBox>
+      </div>
+      <button onClick={loadMoreJobs}>Load</button>
+      <div ref={loadMoreRef} className="load-more" />
+    </div>
   );
 };
 
