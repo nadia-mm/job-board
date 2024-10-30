@@ -3,7 +3,7 @@ import Card from "../components/Card";
 import { fetchAllJobIds } from "../api/jobs";
 import { useEffect, useState, useCallback } from "react";
 import "./JobBoard.css";
-import { useIntersectionObserver } from "../hook/useIntersectionObserver";
+import { useIntersectionObserver } from 'usehooks-ts'
 
 const Jobboard = () => {
   const { data, isLoading, error } = useQuery({
@@ -11,17 +11,25 @@ const Jobboard = () => {
     queryFn: () => fetchAllJobIds(),
   });
 
+  const { isIntersecting, ref } = useIntersectionObserver({
+    threshold: 0.5,
+  })
+  console.log(isIntersecting);
+
   const [jobIds, setJobIds] = useState<number[]>([]);
   const [page, setPage] = useState(1);
-  const jobsPerPage = 6;
-
-  //const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const jobsPerPage = 9;
 
   const loadMoreJobs = useCallback(() => {
     setPage((prevPage) => prevPage + 1);
   }, []);
 
-  const loadMoreRef = useIntersectionObserver(loadMoreJobs);
+  useEffect(() => {
+    if (isIntersecting) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  }, [isIntersecting, loadMoreJobs]);
+
 
   useEffect(() => {
     if (data) {
@@ -51,13 +59,13 @@ const Jobboard = () => {
   return (
     <div className="jobboard-container">
       <h1>HN Jobs</h1>
-      <div className="job-grid">
+      <div className="job-grid" >
         {jobIds.map((id: number) => (
           <Card id={id.toString()} key={id} />
         ))}
       </div>
       <button onClick={loadMoreJobs}>Load</button>
-      <div ref={loadMoreRef} className="load-more" />
+      <div ref={ref} className="load-more" />
     </div>
   );
 };
